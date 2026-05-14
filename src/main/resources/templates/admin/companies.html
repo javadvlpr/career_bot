@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Companies - Career Bot Admin</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<nav class="navbar">
+    <h2>Career Bot Admin</h2>
+    <div class="nav-links">
+        <a href="/admin/dashboard">Dashboard</a>
+        <a href="/admin/companies" class="active">Companies</a>
+        <a href="/admin/jobs">Vacancies</a>
+        <a href="/admin/applications">Applicants</a>
+        <a href="/admin/users">Users</a>
+        <a href="/admin/categories">Categories</a>
+        <a href="/admin/skills">Skills</a>
+        <a href="/admin/professions">Professions</a>
+        <a href="/admin/locations">Locations</a>
+        <a href="/admin/logout">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="table-card">
+        <div class="table-header">
+            <h3>Companies List</h3>
+            <div class="filter-links">
+                <a href="/admin/companies"
+                   th:classappend="${currentStatus == null} ? 'active'">All</a>
+                <a href="/admin/companies?status=PENDING"
+                   th:classappend="${currentStatus == 'PENDING'} ? 'active'">Pending</a>
+                <a href="/admin/companies?status=APPROVED"
+                   th:classappend="${currentStatus == 'APPROVED'} ? 'active'">Approved</a>
+                <a href="/admin/companies?status=REJECTED"
+                   th:classappend="${currentStatus == 'REJECTED'} ? 'active'">Rejected</a>
+            </div>
+        </div>
+
+        <table th:if="${!companies.isEmpty()}">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Company Name</th>
+                <th>TIN</th>
+                <th>Industry</th>
+                <th>Contact</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="company : ${companies}">
+                <td th:text="${company.id}"></td>
+                <td th:text="${company.companyName}"></td>
+                <td th:text="${company.inn}"></td>
+                <td th:text="${company.industry}"></td>
+                <td th:text="${company.contactInfo}"></td>
+                <td>
+                            <span class="badge"
+                                  th:classappend="'badge-' + ${company.status.name().toLowerCase()}"
+                                  th:text="${company.status}"></span>
+                </td>
+                <td>
+                    <div class="btn-group" th:if="${company.status.name() == 'PENDING'}">
+                        <form th:action="@{/admin/companies/{id}/approve(id=${company.id})}" method="post" style="display:inline">
+                            <button type="submit" class="btn btn-approve">Approve</button>
+                        </form>
+                        <form th:action="@{/admin/companies/{id}/reject(id=${company.id})}" method="post" style="display:inline">
+                            <button type="submit" class="btn btn-reject">Reject</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div th:if="${companies.isEmpty()}" class="empty-state">
+            <p>No companies found</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

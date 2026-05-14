@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Professions - Career Bot Admin</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<nav class="navbar">
+    <h2>Career Bot Admin</h2>
+    <div class="nav-links">
+        <a href="/admin/dashboard">Dashboard</a>
+        <a href="/admin/companies">Companies</a>
+        <a href="/admin/jobs">Vacancies</a>
+        <a href="/admin/applications">Applicants</a>
+        <a href="/admin/users">Users</a>
+        <a href="/admin/categories">Categories</a>
+        <a href="/admin/skills">Skills</a>
+        <a href="/admin/professions" class="active">Professions</a>
+        <a href="/admin/locations">Locations</a>
+        <a href="/admin/logout">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <div class="table-card">
+        <div class="table-header">
+            <h3>Add New Profession</h3>
+        </div>
+        <form action="/admin/professions/create" method="post" style="padding: 20px; display: flex; gap: 10px;">
+            <input type="text" name="name" placeholder="Profession name (e.g. Java Developer)" required
+                   style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <select name="categoryId" required
+                    style="padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                <option value="">-- Select a category --</option>
+                <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+            </select>
+            <button type="submit" class="btn btn-approve">Add</button>
+        </form>
+    </div>
+
+    <div class="table-card" style="margin-top: 20px;">
+        <div class="table-header">
+            <h3>Professions List</h3>
+            <div class="filter-links">
+                <a href="/admin/professions" th:classappend="${currentCategoryId == null} ? 'active'">All</a>
+                <a th:each="cat : ${categories}"
+                   th:href="@{/admin/professions(categoryId=${cat.id})}"
+                   th:text="${cat.name}"
+                   th:classappend="${currentCategoryId != null and currentCategoryId == cat.id} ? 'active'"></a>
+            </div>
+        </div>
+
+        <table th:if="${!professions.isEmpty()}">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="prof : ${professions}">
+                <td th:text="${prof.id}">1</td>
+                <td>
+                    <form th:action="@{|/admin/professions/${prof.id}/update|}" method="post"
+                          style="display: flex; gap: 5px; align-items: center;">
+                        <input type="text" name="name" th:value="${prof.name}" required
+                               style="flex: 1; padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
+                        <select name="categoryId" required
+                                style="padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
+                            <option th:each="cat : ${categories}"
+                                    th:value="${cat.id}"
+                                    th:text="${cat.name}"
+                                    th:selected="${prof.category != null and prof.category.id == cat.id}"></option>
+                        </select>
+                        <button type="submit" class="btn btn-approve" style="padding: 6px 12px;">Save</button>
+                    </form>
+                </td>
+                <td th:text="${prof.category != null ? prof.category.name : '-'}">-</td>
+                <td>
+                    <form th:action="@{|/admin/professions/${prof.id}/delete|}" method="post"
+                          onsubmit="return confirm('Are you sure you want to delete this?')" style="display: inline;">
+                        <button type="submit" class="btn btn-reject">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div th:if="${professions.isEmpty()}" style="padding: 20px; text-align: center; color: #666;">
+            No professions found
+        </div>
+    </div>
+</div>
+</body>
+</html>

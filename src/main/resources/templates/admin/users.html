@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users - Career Bot Admin</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<nav class="navbar">
+    <h2>Career Bot Admin</h2>
+    <div class="nav-links">
+        <a href="/admin/dashboard">Dashboard</a>
+        <a href="/admin/companies">Companies</a>
+        <a href="/admin/jobs">Vacancies</a>
+        <a href="/admin/applications">Applicants</a>
+        <a href="/admin/users" class="active">Users</a>
+        <a href="/admin/categories">Categories</a>
+        <a href="/admin/skills">Skills</a>
+        <a href="/admin/professions">Professions</a>
+        <a href="/admin/locations">Locations</a>
+        <a href="/admin/logout">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="table-card">
+        <div class="table-header">
+            <h3>Users List</h3>
+        </div>
+
+        <table th:if="${!users.isEmpty()}">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Profession</th>
+                <th>Experience</th>
+                <th>Location</th>
+                <th>Expected Salary</th>
+                <th>Status</th>
+                <th>Registered</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="user : ${users}">
+                <td th:text="${user.id}"></td>
+                <td th:text="${user.name != null ? user.name : '—'}"></td>
+                <td th:text="${user.profession != null ? user.profession : '—'}"></td>
+                <td th:text="${user.experienceLevel != null ? user.experienceLevel : '—'}"></td>
+                <td th:text="${user.location != null ? user.location : '—'}"></td>
+                <td th:text="${user.expectedSalary != null ? user.expectedSalary : '—'}"></td>
+                <td>
+                            <span class="badge"
+                                  th:classappend="${user.searchStatus.name() == 'ACTIVE'} ? 'badge-approved' : (${user.searchStatus.name() == 'PASSIVE'} ? 'badge-pending' : 'badge-rejected')"
+                                  th:text="${user.searchStatus}"></span>
+                </td>
+                <td th:text="${#temporals.format(user.createdAt, 'dd.MM.yyyy')}"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div th:if="${users.isEmpty()}" class="empty-state">
+            <p>No users found</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

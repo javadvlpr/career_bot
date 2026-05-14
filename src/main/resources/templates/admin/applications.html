@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Applicants - Career Bot Admin</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<nav class="navbar">
+    <h2>Career Bot Admin</h2>
+    <div class="nav-links">
+        <a href="/admin/dashboard">Dashboard</a>
+        <a href="/admin/companies">Companies</a>
+        <a href="/admin/jobs">Vacancies</a>
+        <a href="/admin/applications" class="active">Applicants</a>
+        <a href="/admin/users">Users</a>
+        <a href="/admin/categories">Categories</a>
+        <a href="/admin/skills">Skills</a>
+        <a href="/admin/professions">Professions</a>
+        <a href="/admin/locations">Locations</a>
+        <a href="/admin/logout">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="table-card">
+        <div class="table-header">
+            <h3>Applicants List</h3>
+            <div class="filter-links">
+                <a href="/admin/applications"
+                   th:classappend="${currentStatus == null} ? 'active'">All</a>
+                <a href="/admin/applications?status=PENDING"
+                   th:classappend="${currentStatus == 'PENDING'} ? 'active'">New</a>
+                <a href="/admin/applications?status=VIEWED"
+                   th:classappend="${currentStatus == 'VIEWED'} ? 'active'">Viewed</a>
+                <a href="/admin/applications?status=ACCEPTED"
+                   th:classappend="${currentStatus == 'ACCEPTED'} ? 'active'">Accepted</a>
+                <a href="/admin/applications?status=REJECTED"
+                   th:classappend="${currentStatus == 'REJECTED'} ? 'active'">Rejected</a>
+            </div>
+        </div>
+
+        <table th:if="${!applications.isEmpty()}">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Vacancy</th>
+                <th>Company</th>
+                <th>User</th>
+                <th>Contact</th>
+                <th>Status</th>
+                <th>Date</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="app : ${applications}">
+                <td th:text="${app.id}">1</td>
+                <td th:text="${app.job != null ? app.job.title : '-'}">Java Dev</td>
+                <td th:text="${app.company != null ? app.company.companyName : '-'}">TechCo</td>
+                <td th:text="${app.user != null ? app.user.name : '-'}">John</td>
+                <td th:text="${app.user != null and app.user.phoneNumber != null ? app.user.phoneNumber : '-'}">-</td>
+                <td>
+                    <span th:if="${app.status.name() == 'PENDING'}" style="color: orange;">⏳ New</span>
+                    <span th:if="${app.status.name() == 'VIEWED'}" style="color: blue;">👁 Viewed</span>
+                    <span th:if="${app.status.name() == 'ACCEPTED'}" style="color: green;">✅ Accepted</span>
+                    <span th:if="${app.status.name() == 'REJECTED'}" style="color: red;">❌ Rejected</span>
+                </td>
+                <td th:text="${#temporals.format(app.appliedAt, 'dd.MM.yyyy HH:mm')}">2026-05-08</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div th:if="${applications.isEmpty()}" style="padding: 20px; text-align: center; color: #666;">
+            No applicants found
+        </div>
+    </div>
+</div>
+</body>
+</html>

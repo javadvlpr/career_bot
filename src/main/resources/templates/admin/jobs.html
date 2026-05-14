@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vacancies - Career Bot Admin</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<nav class="navbar">
+    <h2>Career Bot Admin</h2>
+    <div class="nav-links">
+        <a href="/admin/dashboard">Dashboard</a>
+        <a href="/admin/companies">Companies</a>
+        <a href="/admin/jobs" class="active">Vacancies</a>
+        <a href="/admin/applications">Applicants</a>
+        <a href="/admin/users">Users</a>
+        <a href="/admin/categories">Categories</a>
+        <a href="/admin/skills">Skills</a>
+        <a href="/admin/professions">Professions</a>
+        <a href="/admin/locations">Locations</a>
+        <a href="/admin/logout">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="table-card">
+        <div class="table-header">
+            <h3>Vacancies List</h3>
+            <div class="filter-links">
+                <a href="/admin/jobs"
+                   th:classappend="${currentStatus == null} ? 'active'">All</a>
+                <a href="/admin/jobs?status=PENDING"
+                   th:classappend="${currentStatus == 'PENDING'} ? 'active'">Pending</a>
+                <a href="/admin/jobs?status=APPROVED"
+                   th:classappend="${currentStatus == 'APPROVED'} ? 'active'">Approved</a>
+                <a href="/admin/jobs?status=REJECTED"
+                   th:classappend="${currentStatus == 'REJECTED'} ? 'active'">Rejected</a>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <a href="/admin/jobs/new" class="btn btn-approve" style="padding: 10px 20px; text-decoration: none;">
+                    ➕ Add New Vacancy
+                </a>
+            </div>
+        </div>
+
+        <table th:if="${!jobs.isEmpty()}">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Position</th>
+                <th>Company</th>
+                <th>Location</th>
+                <th>Salary</th>
+                <th>Source</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="job : ${jobs}">
+                <td th:text="${job.id}"></td>
+                <td th:text="${job.title}"></td>
+                <td th:text="${job.company != null ? job.company.companyName : 'Jooble'}"></td>
+                <td th:text="${job.location}"></td>
+                <td>
+                            <span th:if="${job.salaryMin != null || job.salaryMax != null}"
+                                  th:text="${(job.salaryMin != null ? job.salaryMin : '?') + ' - ' + (job.salaryMax != null ? job.salaryMax : '?')}">
+                            </span>
+                    <span th:if="${job.salaryMin == null && job.salaryMax == null}">—</span>
+                </td>
+                <td th:text="${job.source}"></td>
+                <td>
+                            <span class="badge"
+                                  th:classappend="'badge-' + ${job.status.name().toLowerCase()}"
+                                  th:text="${job.status}"></span>
+                </td>
+                <td>
+                    <div class="btn-group">
+                        <form th:if="${job.status.name() == 'PENDING'}"
+                              th:action="@{/admin/jobs/{id}/approve(id=${job.id})}" method="post" style="display:inline">
+                            <button type="submit" class="btn btn-approve">Approve</button>
+                        </form>
+                        <form th:if="${job.status.name() == 'PENDING'}"
+                              th:action="@{/admin/jobs/{id}/reject(id=${job.id})}" method="post" style="display:inline">
+                            <button type="submit" class="btn btn-reject">Reject</button>
+                        </form>
+                        <form th:if="${job.status.name() == 'APPROVED'}"
+                              th:action="@{/admin/jobs/{id}/close(id=${job.id})}" method="post" style="display:inline">
+                            <button type="submit" class="btn btn-close">Close</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div th:if="${jobs.isEmpty()}" class="empty-state">
+            <p>No vacancies found</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

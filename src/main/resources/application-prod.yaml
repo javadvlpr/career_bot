@@ -1,0 +1,24 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    defer-datasource-initialization: true
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  thymeleaf:
+    cache: true
+
+  sql:
+    init:
+      mode: always
+
+logging:
+  level:
+    root: WARN
+    uz.career.career_bot: INFO
+    org.springframework: WARN
+    org.hibernate: WARN

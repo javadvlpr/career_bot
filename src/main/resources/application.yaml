@@ -1,0 +1,58 @@
+spring:
+  application:
+    name: career-bot
+
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/career_bot}
+    username: ${SPRING_DATASOURCE_USERNAME:${DB_USERNAME:postgres}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:root123}}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    defer-datasource-initialization: true
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  thymeleaf:
+    cache: false
+
+  sql:
+    init:
+      mode: always
+
+bot:
+  username: ${BOT_USERNAME:careercounselling_bot}
+  token: ${BOT_TOKEN}
+
+jooble:
+  api-key: ${JOOBLE_API_KEY}
+  base-url: https://jooble.org/api
+
+matching:
+  weight:
+    skill: 0.40
+    experience: 0.25
+    location: 0.20
+    salary: 0.15
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+server:
+  port: ${PORT:${SERVER_PORT:8080}}
+
+logging:
+  level:
+    root: INFO
+    uz.career.career_bot: INFO

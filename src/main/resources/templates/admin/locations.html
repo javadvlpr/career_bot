@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Locations - Career Bot Admin</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<nav class="navbar">
+    <h2>Career Bot Admin</h2>
+    <div class="nav-links">
+        <a href="/admin/dashboard">Dashboard</a>
+        <a href="/admin/companies">Companies</a>
+        <a href="/admin/jobs">Vacancies</a>
+        <a href="/admin/applications">Applicants</a>
+        <a href="/admin/users">Users</a>
+        <a href="/admin/categories">Categories</a>
+        <a href="/admin/skills">Skills</a>
+        <a href="/admin/professions">Professions</a>
+        <a href="/admin/locations" class="active">Locations</a>
+        <a href="/admin/logout">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <div class="table-card">
+        <div class="table-header">
+            <h3>Add New Location</h3>
+        </div>
+        <form action="/admin/locations/create" method="post" style="padding: 20px; display: flex; gap: 10px;">
+            <input type="text" name="name" placeholder="Location name (e.g. Karshi)" required
+                   style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <button type="submit" class="btn btn-approve">Add</button>
+        </form>
+    </div>
+
+    <div class="table-card" style="margin-top: 20px;">
+        <div class="table-header">
+            <h3>Locations List</h3>
+        </div>
+
+        <table th:if="${!locations.isEmpty()}">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="loc : ${locations}">
+                <td th:text="${loc.id}">1</td>
+                <td>
+                    <form th:action="@{|/admin/locations/${loc.id}/update|}" method="post"
+                          style="display: flex; gap: 10px; align-items: center;">
+                        <input type="text" name="name" th:value="${loc.name}" required
+                               style="flex: 1; padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
+                        <label style="white-space: nowrap;">
+                            <input type="checkbox" name="active" value="true"
+                                   th:checked="${loc.active}"> Active
+                        </label>
+                        <button type="submit" class="btn btn-approve" style="padding: 6px 12px;">Save</button>
+                    </form>
+                </td>
+                <td>
+                    <span th:if="${loc.active}" style="color: green;">🟢 Active</span>
+                    <span th:unless="${loc.active}" style="color: gray;">🔴 Inactive</span>
+                </td>
+                <td>
+                    <form th:action="@{|/admin/locations/${loc.id}/delete|}" method="post"
+                          onsubmit="return confirm('Are you sure you want to delete this?')" style="display: inline;">
+                        <button type="submit" class="btn btn-reject">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div th:if="${locations.isEmpty()}" style="padding: 20px; text-align: center; color: #666;">
+            No locations found
+        </div>
+    </div>
+</div>
+</body>
+</html>
