@@ -101,13 +101,13 @@
         </dependency>
 
 
-        <!-- dotenv -->
+<!--        &lt;!&ndash; dotenv &ndash;&gt;-->
 
-        <dependency>
-            <groupId>me.paulschwarz</groupId>
-            <artifactId>spring-dotenv</artifactId>
-            <version>${dotenv.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>me.paulschwarz</groupId>-->
+<!--            <artifactId>spring-dotenv</artifactId>-->
+<!--            <version>${dotenv.version}</version>-->
+<!--        </dependency>-->
 
 
         <!-- Thymeleaf Security -->
