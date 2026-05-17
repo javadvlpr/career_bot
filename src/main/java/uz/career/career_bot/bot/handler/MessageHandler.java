@@ -502,7 +502,7 @@ public class MessageHandler {
         sb.append("🔍 Status: ").append(user.getSearchStatus().name()).append("\n");
 
         boolean hasCv = user.getCvFileId() != null && !user.getCvFileId().isEmpty();
-        sb.append("📄 CV: ").append(hasCv ? "not upload (" + user.getCvFileName() + ")" : "no").append("\n");
+        sb.append("📄 CV: ").append(hasCv ? "(" + user.getCvFileName() + ")" : "no").append("\n");
 
         SendMessage msg = sendText(chatId, sb.toString());
         msg.setReplyMarkup(keyboard.profileEditKeyboard(hasCv));

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uz.career.career_bot.dto.MatchResultDTO;
 import uz.career.career_bot.entity.Job;
+import uz.career.career_bot.entity.Profession;
 import uz.career.career_bot.entity.Skill;
 import uz.career.career_bot.entity.User;
 import uz.career.career_bot.enums.ExperienceLevel;
@@ -13,7 +14,6 @@ import uz.career.career_bot.enums.JobStatus;
 import uz.career.career_bot.enums.SearchStatus;
 import uz.career.career_bot.repository.JobRepository;
 import uz.career.career_bot.repository.UserRepository;
-import uz.career.career_bot.entity.Profession;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,21 +27,25 @@ public class MatchingService {
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
 
-    @Value("${matching.weight.skill:0.40}")
+    @Value("${matching.weight.skill:0.30}")
     private double skillWeight;
 
-    @Value("${matching.weight.experience:0.25}")
+    @Value("${matching.weight.profession:0.25}")
+    private double professionWeight;
+
+    @Value("${matching.weight.experience:0.20}")
     private double experienceWeight;
 
-    @Value("${matching.weight.location:0.20}")
+    @Value("${matching.weight.location:0.15}")
     private double locationWeight;
 
-    @Value("${matching.weight.salary:0.15}")
+    @Value("${matching.weight.salary:0.10}")
     private double salaryWeight;
 
     /**
      * Finding the most suitable vacancies for the user
-     * score = (w1 * skillMatch) + (w2 * expMatch) + (w3 * locMatch) + (w4 * salaryMatch)
+     * score = (w1 * skill) + (w2 * profession) + (w3 * experience)
+     *       + (w4 * location) + (w5 * salary)
      */
     @Transactional(readOnly = true)
     public List<MatchResultDTO> findJobsForUser(User user, int limit) {
@@ -82,24 +86,25 @@ public class MatchingService {
     }
 
     /**
-     * Basic matching formula
+     * Weighted multi-criteria matching formula.
+     * All component scores are normalized to [0.0, 1.0].
+     * Weights are externalized to application.yaml under matching.weight.*
      */
     public double calculateScore(User user, Job job) {
-        double skillScore = calculateSkillMatch(user.getSkills(), job.getSkills());
-        double profScore = calculateProfessionMatch(user.getProfession(), job.getProfession());
-        double expScore = calculateExperienceMatch(user.getExperienceLevel(), job.getExperienceLevel());
-        double locScore = calculateLocationMatch(user.getLocation(), job.getLocation());
-        double salScore = calculateSalaryMatch(user.getExpectedSalary(), job.getSalaryMin(), job.getSalaryMax());
+        double skillScore      = calculateSkillMatch(user.getSkills(), job.getSkills());
+        double professionScore = calculateProfessionMatch(user.getProfession(), job.getProfession());
+        double expScore        = calculateExperienceMatch(user.getExperienceLevel(), job.getExperienceLevel());
+        double locScore        = calculateLocationMatch(user.getLocation(), job.getLocation());
+        double salaryScore     = calculateSalaryMatch(user.getExpectedSalary(), job.getSalaryMin(), job.getSalaryMax());
 
-        return (0.30 * skillScore)
-                + (0.25 * profScore)
-                + (0.20 * expScore)
-                + (0.15 * locScore)
-                + (0.10 * salScore);
+        return skillWeight      * skillScore
+                + professionWeight * professionScore
+                + experienceWeight * expScore
+                + locationWeight   * locScore
+                + salaryWeight     * salaryScore;
     }
 
-    public double calculateProfessionMatch(Profession userProf,
-                                           Profession jobProf) {
+    public double calculateProfessionMatch(Profession userProf, Profession jobProf) {
         if (userProf == null || jobProf == null) return 0.5;
         if (userProf.getId().equals(jobProf.getId())) return 1.0;
         if (userProf.getCategory() != null && jobProf.getCategory() != null

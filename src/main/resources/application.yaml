@@ -38,10 +38,11 @@ jooble:
 
 matching:
   weight:
-    skill: 0.40
-    experience: 0.25
-    location: 0.20
-    salary: 0.15
+    skill: 0.30
+    profession: 0.25
+    experience: 0.20
+    location: 0.15
+    salary: 0.10
 
 springdoc:
   api-docs:

@@ -12,6 +12,11 @@ import uz.career.career_bot.entity.Skill;
 import uz.career.career_bot.enums.ExperienceLevel;
 import uz.career.career_bot.repository.JobRepository;
 import uz.career.career_bot.repository.UserRepository;
+import uz.career.career_bot.entity.Category;
+import uz.career.career_bot.entity.Job;
+import uz.career.career_bot.entity.Profession;
+import uz.career.career_bot.entity.User;
+import uz.career.career_bot.enums.SearchStatus;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -32,10 +37,11 @@ class MatchingServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(matchingService, "skillWeight", 0.40);
-        ReflectionTestUtils.setField(matchingService, "experienceWeight", 0.25);
-        ReflectionTestUtils.setField(matchingService, "locationWeight", 0.20);
-        ReflectionTestUtils.setField(matchingService, "salaryWeight", 0.15);
+        ReflectionTestUtils.setField(matchingService, "skillWeight", 0.30);
+        ReflectionTestUtils.setField(matchingService, "professionWeight", 0.25);
+        ReflectionTestUtils.setField(matchingService, "experienceWeight", 0.20);
+        ReflectionTestUtils.setField(matchingService, "locationWeight", 0.15);
+        ReflectionTestUtils.setField(matchingService, "salaryWeight", 0.10);
     }
 
     // === SKILL MATCHING ===
@@ -135,7 +141,97 @@ class MatchingServiceTest {
         assertEquals(0.5, matchingService.calculateSalaryMatch(null, 5000000, 8000000));
     }
 
-    // === HELPER ===
+    // === PROFESSION MATCHING ===
+
+    @Test
+    @DisplayName("Bir xil kasb 1.0 qaytadi")
+    void professionMatch_sameProfession_returns1() {
+        Profession prof = createProfession(1L, 1L);
+        assertEquals(1.0, matchingService.calculateProfessionMatch(prof, prof));
+    }
+
+    @Test
+    @DisplayName("Bir xil kategoriyadagi turli kasb 0.5 qaytadi")
+    void professionMatch_sameCategory_returnsHalf() {
+        Profession userProf = createProfession(1L, 1L); // category 1
+        Profession jobProf = createProfession(2L, 1L);  // same category
+        assertEquals(0.5, matchingService.calculateProfessionMatch(userProf, jobProf));
+    }
+
+    @Test
+    @DisplayName("Boshqa kategoriyadagi kasb 0.0 qaytadi")
+    void professionMatch_differentCategory_returns0() {
+        Profession userProf = createProfession(1L, 1L);
+        Profession jobProf = createProfession(2L, 2L);
+        assertEquals(0.0, matchingService.calculateProfessionMatch(userProf, jobProf));
+    }
+
+    @Test
+    @DisplayName("Kasb null bo'lsa 0.5 qaytadi")
+    void professionMatch_null_returnsHalf() {
+        assertEquals(0.5, matchingService.calculateProfessionMatch(null, null));
+    }
+
+    // === COMPOSITE SCORE ===
+
+    @Test
+    @DisplayName("Hamma mezon mos kelsa score 1.0 ga yaqin bo'ladi")
+    void calculateScore_perfectMatch_returnsHighScore() {
+        Profession prof = createProfession(1L, 1L);
+
+        User user = User.builder()
+                .profession(prof)
+                .skills(createSkills(1L, 2L))
+                .experienceLevel(ExperienceLevel.MIDDLE)
+                .location("Tashkent")
+                .expectedSalary(5_000_000)
+                .searchStatus(SearchStatus.ACTIVE)
+                .build();
+
+        Job job = Job.builder()
+                .profession(prof)
+                .skills(createSkills(1L, 2L))
+                .experienceLevel(ExperienceLevel.MIDDLE)
+                .location("Tashkent")
+                .salaryMin(4_000_000)
+                .salaryMax(6_000_000)
+                .build();
+
+        double score = matchingService.calculateScore(user, job);
+
+        assertTrue(score > 0.9,
+                "Hamma mezon bo'yicha to'liq mos kelganda score 0.9 dan yuqori bo'lishi kerak");
+    }
+
+    @Test
+    @DisplayName("Hech qanday mezon mos kelmasa score past bo'ladi")
+    void calculateScore_noMatch_returnsLowScore() {
+        Profession userProf = createProfession(1L, 1L);
+        Profession jobProf = createProfession(2L, 2L);
+
+        User user = User.builder()
+                .profession(userProf)
+                .skills(createSkills(1L, 2L))
+                .experienceLevel(ExperienceLevel.JUNIOR)
+                .location("Tashkent")
+                .expectedSalary(3_000_000)
+                .build();
+
+        Job job = Job.builder()
+                .profession(jobProf)
+                .skills(createSkills(5L, 6L))
+                .experienceLevel(ExperienceLevel.SENIOR)
+                .location("Samarkand")
+                .salaryMin(10_000_000)
+                .salaryMax(15_000_000)
+                .build();
+
+        double score = matchingService.calculateScore(user, job);
+
+        assertTrue(score < 0.2,
+                "Hech qanday mezon mos kelmaganda score 0.2 dan past bo'lishi kerak");
+    }
+
 
     private Set<Skill> createSkills(Long... ids) {
         Set<Skill> skills = new HashSet<>();
@@ -146,5 +242,17 @@ class MatchingServiceTest {
             skills.add(s);
         }
         return skills;
+    }
+
+    private Profession createProfession(Long id, Long categoryId) {
+        Category category = new Category();
+        category.setId(categoryId);
+        category.setName("Category" + categoryId);
+
+        Profession profession = new Profession();
+        profession.setId(id);
+        profession.setName("Profession" + id);
+        profession.setCategory(category);
+        return profession;
     }
 }
